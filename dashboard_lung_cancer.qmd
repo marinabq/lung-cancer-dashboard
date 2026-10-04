@@ -1,0 +1,153 @@
+---
+title: "Dashboard Lung Cancer"
+author: "Marina Barahona Quijano"
+format: 
+  dashboard:
+    theme: flatly
+    orientation: rows
+    scrolling: true
+---
+
+```{r}
+#| label: setup
+#| include: false
+source("lung_cancer_modelo.R")
+```
+
+# Resumen 
+## Row
+
+```{r}
+#| content: valuebox
+#| title: "Número de individuos"
+
+list(
+  value = nrow(lung_cancer),
+  icon = "people"
+)
+```
+
+```{r}
+#| content: valuebox
+#| title: "Individuos con cáncer"
+
+list(
+  value = sum(lung_cancer$LUNG_CANCER == "YES"),
+  icon = "activity"
+)
+```
+
+## Row
+
+```{r}
+#| title: "Individuos con y sin cáncer"
+#| echo: false
+
+p_cancer
+```
+
+```{r}
+#| title: "Edad según cáncer"
+#| echo: false
+
+p_edad
+```
+
+# Análisis descriptivo
+
+## Row
+```{r}
+#| title: "Características de los individuos según cáncer"
+#| echo: false
+
+p_variables
+```
+
+# Análisis estadístico
+
+## Row
+```{r}
+#| title: "Pruebas de asociación"
+
+resultados
+```
+
+# Random Forest
+## Row
+
+```{r}
+#| content: valuebox
+#| title: "Accuracy"
+
+list(
+  value = paste0(round(accuracy * 100, 2), "%"),
+  icon = "bullseye"
+)
+```
+
+## Row
+
+```{r}
+#| title: "Importancia de las variables"
+#| echo: false
+
+ggplot(
+  importancia,
+  aes(
+    x = reorder(Variable, MeanDecreaseAccuracy),
+    y = MeanDecreaseAccuracy
+  )
+) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    x = "Variable",
+    y = "Mean Decrease Accuracy",
+    title = "Importancia de las variables — Random Forest"
+  ) +
+  theme_minimal()
+```
+
+### Interpretación de las medidas del modelo
+
+- **Accuracy:** proporción de individuos del conjunto de test que fueron clasificados correctamente por el modelo. En este análisis, la accuracy fue del **90,32%**.
+
+- **Mean Decrease Accuracy:** indica cuánto disminuye la capacidad predictiva del modelo cuando una variable pierde su información. Valores más altos indican una mayor importancia para la predicción.
+
+- **Mean Decrease Gini:** mide cuánto contribuye una variable a mejorar las divisiones de los árboles del Random Forest. Valores más altos indican una mayor contribución a la separación entre individuos con y sin cáncer.
+
+
+## Row
+```{r}
+#| title: "Matriz de confusión"
+
+knitr::kable(
+  matriz_confusion,
+  col.names = c("Predicción NO", "Predicción YES")
+)
+```
+
+# Conclusiones
+
+El análisis mostró asociaciones estadísticamente significativas entre la presencia de cáncer de pulmón y las variables YELLOW_FINGERS, ANXIETY, PEER_PRESSURE, FATIGUE, ALLERGY, WHEEZING, ALCOHOL CONSUMING, COUGHING, SWALLOWING DIFFICULTY y CHEST PAIN (p < 0,05).  
+En cambio, la edad no presentó diferencias estadísticamente significativas entre los individuos con y sin cáncer de pulmón (p = 0,1823).
+El modelo Random Forest obtuvo una accuracy del 90,32% en el conjunto de test, mostrando una buena capacidad predictiva en los datos analizados. Según Mean Decrease Accuracy, las variables más importantes fueron YELLOW_FINGERS y ALCOHOL CONSUMING, mientras que AGE presentó la mayor importancia según Mean Decrease Gini.
+En conjunto, los resultados permiten identificar variables asociadas al cáncer de pulmón y variables relevantes para su predicción. Sin embargo, estas asociaciones no implican causalidad.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
